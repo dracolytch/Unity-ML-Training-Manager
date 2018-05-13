@@ -619,8 +619,8 @@ MonoBehaviour:
     endValue: 0.0002
     isUsed: 1
   - key: max_steps
-    startValue: 5000
-    endValue: 5000
+    startValue: 100000
+    endValue: 100000
     isUsed: 1
   - key: memory_size
     startValue: 256
