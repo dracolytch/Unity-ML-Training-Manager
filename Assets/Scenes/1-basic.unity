@@ -121,6 +121,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 58852527}
+  - component: {fileID: 58852528}
   - component: {fileID: 58852526}
   m_Layer: 0
   m_Name: TrainingManager
@@ -169,10 +170,26 @@ Transform:
   - {fileID: 529405230}
   - {fileID: 1441214748}
   - {fileID: 1795571087}
-  - {fileID: 1865808116}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &58852528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 58852525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f20d147064065ab4a83f2ca17848f3a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MlAgentsRootDirectory: \MLAgents-0-3\python
+  SummariesDirectory: \MLAgents-0-3\python\summaries
+  ModelsDirectory: \MLAgents-0-3\python\models
+  UnityOutputDirectory: e:\MLAgents-0-3\python
+  TensorboardDirectory: 
+  MlAgentsConfigDirectory: e:\MLAgents-0-3\python
 --- !u!1 &529405228
 GameObject:
   m_ObjectHideFlags: 0
@@ -201,8 +218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TensorboardUrl: http://localhost:6006
-  TensorboardPath: 
-  SummariesDirectory: E:\MLAgents-0-3\python\summaries\
+  TensorboardStartupTime: 10
+  tensorFlowCOnfig: {fileID: 58852528}
   OnTensorboardSuccess:
     m_PersistentCalls:
       m_Calls:
@@ -233,28 +250,6 @@ MonoBehaviour:
   OnTensorboardFailure:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 529405229}
-        m_MethodName: StartTensorboard
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 58852526}
-        m_MethodName: Log
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Starting Tensorboard
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 529405229}
         m_MethodName: CheckTensorboard
         m_Mode: 1
@@ -308,20 +303,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1b31d098689ccc41b3e2cc5b28d3936, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RunSetName: MyRunSet
-  ExePath: E:\MLAgents-0-3\python
-  ExeFile: learn.py
-  Arguments:
-  - threeinputs-xLayers.exe
-  - --train
+  RunSetName: BasicTraining
+  PauseBeforeRun: 2
+  UnityOutputExeName: threeinputs-xLayers.exe
   StartingConfigIncrement: 1
-  MaxConfigIncrement: 100
-  RunsPerIncrement: 5
+  MaxConfigIncrement: 1
+  RunsPerConfiguration: 5
+  tensorFlowConfig: {fileID: 58852528}
+  TbManager: {fileID: 529405229}
+  ContinueFromSaved: 0
+  ContinueFromModel: 
+  RunStats: []
   OnNextIncrement:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1441214747}
-        m_MethodName: IncrementSpread
+        m_MethodName: IncrementLinear
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -356,6 +353,22 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnAllIncrementsComplete:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 58852526}
+        m_MethodName: Log
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: All Runs Complete
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
@@ -547,8 +560,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 950ffc5e7ee1fdc46bed5aa10ba8adc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConfigPath: E:\MLAgents-0-3\python
-  ConfigFilename: threeInput.json
+  tensorFlowConfig: {fileID: 58852528}
+  ConfigFilename: threeInputs.json
   settings:
   - key: layers
     startValue: 20
@@ -578,7 +591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2563e061254e5dd43a375516040c2689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrainerConfigPath: E:\MLAgents-0-3\python\
+  tensorFlowConfig: {fileID: 58852528}
   TrainerConfigFilename: trainer_config.yaml
   BrainName: BasicBrain6
   settings:
@@ -587,16 +600,16 @@ MonoBehaviour:
     endValue: ppo
     isUsed: 0
   - key: batch_size
-    startValue: 1000
-    endValue: 1000
-    isUsed: 1
+    startValue: 8000
+    endValue: 8000
+    isUsed: 0
   - key: beta
     startValue: 0.001
     endValue: 0.001
-    isUsed: 1
+    isUsed: 0
   - key: buffer_size
-    startValue: 100
-    endValue: 10000
+    startValue: 80000
+    endValue: 80000
     isUsed: 0
   - key: epsilon
     startValue: 0.2
@@ -609,18 +622,18 @@ MonoBehaviour:
   - key: hidden_units
     startValue: 128
     endValue: 128
-    isUsed: 0
+    isUsed: 1
   - key: lambd
     startValue: 0.95
     endValue: 0.95
     isUsed: 0
   - key: learning_rate
-    startValue: 0.0002
-    endValue: 0.0002
-    isUsed: 1
+    startValue: 0.001
+    endValue: 0.001
+    isUsed: 0
   - key: max_steps
-    startValue: 100000
-    endValue: 100000
+    startValue: 50000
+    endValue: 50000
     isUsed: 1
   - key: memory_size
     startValue: 256
@@ -633,7 +646,7 @@ MonoBehaviour:
   - key: num_epoch
     startValue: 5
     endValue: 5
-    isUsed: 1
+    isUsed: 0
   - key: num_layers
     startValue: 2
     endValue: 2
@@ -641,15 +654,15 @@ MonoBehaviour:
   - key: time_horizon
     startValue: 500
     endValue: 500
-    isUsed: 1
+    isUsed: 0
   - key: sequence_length
     startValue: 64
     endValue: 64
-    isUsed: 1
+    isUsed: 0
   - key: summary_freq
     startValue: 2500
     endValue: 2500
-    isUsed: 1
+    isUsed: 0
   - key: use_recurrent
     startValue: false
     endValue: false
@@ -658,31 +671,3 @@ MonoBehaviour:
     startValue: TeacherBrain
     endValue: TeacherBrain
     isUsed: 0
---- !u!1 &1865808115
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1865808116}
-  m_Layer: 0
-  m_Name: EvolutionManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1865808116
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1865808115}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 58852527}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

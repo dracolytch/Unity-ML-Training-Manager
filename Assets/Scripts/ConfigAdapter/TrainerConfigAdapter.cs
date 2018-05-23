@@ -6,7 +6,8 @@ using System.IO;
 
 public class TrainerConfigAdapter : MonoBehaviour {
 
-    public string TrainerConfigPath = "E:\\MLAgents-0-3\\python\\";
+    //public string TrainerConfigPath = "E:\\MLAgents-0-3\\python\\";
+    public TensorFlowConfig tensorFlowConfig;
     public string TrainerConfigFilename = "trainer_config.yaml";
     public string BrainName;
     public List<ConfigKvp> settings = new List<ConfigKvp>();
@@ -14,11 +15,23 @@ public class TrainerConfigAdapter : MonoBehaviour {
     string configFile;
 	// Use this for initialization
 	void Start () {
-        configFile = Path.Combine(TrainerConfigPath, TrainerConfigFilename);
+        configFile = Path.Combine(tensorFlowConfig.MlAgentsConfigDirectory, TrainerConfigFilename);
 
         if (File.Exists(configFile))
         {
             File.Copy(configFile, configFile + ".backup-" + System.DateTime.Now.Ticks);
+        }
+    }
+
+    public void UpdateSetting(string key, string startValue, string endValue)
+    {
+        foreach (var setting in settings)
+        {
+            if (setting.key == key)
+            {
+                setting.startValue = startValue;
+                setting.endValue = endValue;
+            }
         }
     }
 	
@@ -57,6 +70,6 @@ public class TrainerConfigAdapter : MonoBehaviour {
         }
 
         File.WriteAllText(configFile, buffer.ToString());
-        File.WriteAllText(Path.Combine(TrainerConfigPath, manager.RunSetName + "-inc" + manager.GetCurrentStep() + ".yaml"), buffer.ToString());
+        File.WriteAllText(Path.Combine(tensorFlowConfig.MlAgentsConfigDirectory, manager.RunSetName + "-inc" + manager.GetCurrentStep() + ".yaml"), buffer.ToString());
     }
 }

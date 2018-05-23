@@ -3,18 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Diagnostics;
+using System;
+using System.IO;
 
 public class RunManager : MonoBehaviour {
 
     public string RunSetName = "MyRunSet";
-    public string ExePath = "";
-    public string ExeFile = "";
-    public List<string> Arguments = new List<string>();
-    public int StartingConfigIncrement = 0;
-    public int MaxConfigIncrement = 5;
-    public int RunsPerIncrement = 1;
+    public float PauseBeforeRun = 2f;
+    public string UnityOutputExeName;
+    public int StartingConfigIncrement = 1;
+    public int MaxConfigIncrement = 1;
+    public int RunsPerConfiguration = 1;
+    public TensorFlowConfig tensorFlowConfig;
+    public TensorboardManager TbManager;
+
+    public bool ContinueFromSaved = false;
+    public string ContinueFromModel = "";
+
+    public List<RunStatistics> RunStats = new List<RunStatistics>();
+
     public UnityEvent OnNextIncrement = new UnityEvent();
     public UnityEvent OnStartIncrement = new UnityEvent();
+    public UnityEvent OnAllIncrementsComplete = new UnityEvent();
 
     int configIncrement = 0;
     int currentRun = 0;
@@ -22,6 +32,20 @@ public class RunManager : MonoBehaviour {
     public void ExecuteTraining()
     {
         StartCoroutine(DoTrainingCo());
+    }
+
+    static void CopyDirectory(string SourcePath, string DestinationPath)
+    {
+        foreach (string dirPath in Directory.GetDirectories(SourcePath, "*", SearchOption.AllDirectories))
+        {
+            Directory.CreateDirectory(dirPath.Replace(SourcePath, DestinationPath));
+        }
+
+        foreach (string newPath in Directory.GetFiles(SourcePath, "*.*", SearchOption.AllDirectories))
+        {
+            File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
+        }
+            
     }
 
     IEnumerator DoTrainingCo()
@@ -32,27 +56,51 @@ public class RunManager : MonoBehaviour {
         {
             if (OnStartIncrement != null) OnStartIncrement.Invoke();
 
-            for (currentRun = 0; currentRun < RunsPerIncrement; currentRun++)
+            for (currentRun = 0; currentRun < RunsPerConfiguration; currentRun++)
             {
+                yield return new WaitForSeconds(PauseBeforeRun);
                 UnityEngine.Debug.Log("Starting run " + currentRun + " in config increment " + configIncrement);
 
-                var myArguments = new List<string>(Arguments); // Make a copy of the args
+                var myArguments = new List<string>(); // Make a copy of the args
                 var runId = RunSetName + "-inc" + configIncrement + "-run" + currentRun;
+                myArguments.Add(UnityOutputExeName);
                 myArguments.Add("--run-id=" + runId); // Add our own arg
+                myArguments.Add("--train");
 
-                CommandLineRunner.WorkingDirectory = ExePath;
-                currentProcess = CommandLineRunner.StartCommandLine(ExePath, ExeFile, myArguments.ToArray());
+                if (ContinueFromSaved == true)
+                {
+                    myArguments.Add("--load");
+                    var sourcePath = Path.Combine(tensorFlowConfig.ModelsDirectory, ContinueFromModel);
+                    var targetPath = Path.Combine(tensorFlowConfig.ModelsDirectory, runId);
+                    Directory.CreateDirectory(targetPath);
+                    CopyDirectory(sourcePath, targetPath);
+                }
+
+                CommandLineRunner.WorkingDirectory = tensorFlowConfig.MlAgentsRootDirectory;
+                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.MlAgentsRootDirectory, "learn.py", myArguments.ToArray());
 
                 // Coroutine hold until process is complete
                 while (currentProcess.HasExited == false)
                 {
                     yield return null;
                 }
+
+                if (TbManager != null)
+                {
+                    yield return StartCoroutine(TbManager.GetRunStats(runId, currentRun, configIncrement, new Action<RunStatistics>(AddToStats)));
+                }
             }
             currentRun = 0;
 
             if (OnNextIncrement != null) OnNextIncrement.Invoke();
         }
+
+        if (OnAllIncrementsComplete != null) OnAllIncrementsComplete.Invoke();
+    }
+
+    void AddToStats(RunStatistics stats)
+    {
+        RunStats.Add(stats);
     }
 
     public int GetCurrentStep()

@@ -18,7 +18,6 @@ public static class CommandLineRunner {
     {
         var args = string.Join(" ", arguments);
         var processInfo = new ProcessStartInfo(Path.Combine(path, program), args);
-
         processInfo.WorkingDirectory = WorkingDirectory;
         var process = Process.Start(processInfo);
 
