@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f09556fa46f0b84c8d7ca455c8324e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TensorboardUrl: http://desktop-u8bijk9:6006
+  TensorboardUrl: http://localhost:6006
   TensorboardStartupTime: 6
   tensorFlowConfig: {fileID: 58852528}
   OnTensorboardSuccess:
