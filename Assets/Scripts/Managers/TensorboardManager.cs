@@ -1,23 +1,25 @@
 ﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Events;
-using Newtonsoft.Json;
 
-public class TensorboardManager : MonoBehaviour {
+public class TensorboardManager : MonoBehaviour
+{
     //http://localhost:6006/data/plugin/scalars/scalars?run=BatchSize-inc1-run0&tag=Info/cumulative_reward
 
     public string TensorboardUrl = "http://localhost:6006";
     public float TensorboardStartupTime = 10f; //  Give Tensorboard some time to start
-    public TensorFlowConfig tensorFlowCOnfig;
+    public TensorFlowConfig tensorFlowConfig;
     public UnityEvent OnTensorboardSuccess = new UnityEvent();
     public UnityEvent OnTensorboardFailure = new UnityEvent();
 
     public IEnumerator GetRunStats(string runId, int runNumber, int incrementNumber, Action<RunStatistics> action)
     {
         var url = GetRunStatsUrl(runId);
-        using (WWW www = new WWW(url))
+        using(WWW www = new WWW(url))
         {
             yield return www;
             if (string.IsNullOrEmpty(www.error) == true && string.IsNullOrEmpty(www.text) == false)
@@ -35,7 +37,7 @@ public class TensorboardManager : MonoBehaviour {
                 runStats.runId = runId;
                 runStats.runNumber = runNumber;
                 runStats.incrementNumber = incrementNumber;
-                runStats.averageReward = accumulator / (double)runData.data.Count;
+                runStats.averageReward = accumulator / (double) runData.data.Count;
                 runStats.finalReward = runData.data[runData.data.Count - 1][2];
                 action(runStats);
             }
@@ -58,14 +60,21 @@ public class TensorboardManager : MonoBehaviour {
 
     public void StartTensorboard()
     {
-        var args = new List<string>();
-        args.Add("--logdir=" + tensorFlowCOnfig.SummariesDirectory);
-        CommandLineRunner.StartCommandLine(tensorFlowCOnfig.TensorboardDirectory, "tensorboard", args.ToArray());
+        var arguments = new List<string>();
+        arguments.Add("--logdir=" + tensorFlowConfig.SummariesDirectory);
+        var args = string.Join(" ", arguments);
+        CommandLineRunner.StartCommandLine(tensorFlowConfig.TensorBoardExecute + args,
+            tensorFlowConfig.MlAgentsConfigDirectory, ErrorCallBack);
+    }
+
+    void ErrorCallBack(Exception exception)
+    {
+        Debug.LogError(exception.Message);
     }
 
     IEnumerator TestTensorboardCo(string UrlWithPort)
     {
-        using (WWW www = new WWW(UrlWithPort))
+        using(WWW www = new WWW(UrlWithPort))
         {
             yield return www;
             // if there is no error, and is content

@@ -1,16 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Diagnostics;
-using System;
-using System.IO;
 
-public class RunManager : MonoBehaviour {
+public class RunManager : MonoBehaviour
+{
 
     public string RunSetName = "MyRunSet";
     public float PauseBeforeRun = 2f;
-    public string UnityOutputExeName;
+    public string TrainingConfigName = "trainer_config.yaml";
     public int StartingConfigIncrement = 1;
     public int MaxConfigIncrement = 1;
     public int RunsPerConfiguration = 1;
@@ -31,7 +32,7 @@ public class RunManager : MonoBehaviour {
 
     public void ExecuteTraining()
     {
-        StartCoroutine(DoTrainingCo());
+        StartCoroutine(DoTraining());
     }
 
     static void CopyDirectory(string SourcePath, string DestinationPath)
@@ -45,10 +46,10 @@ public class RunManager : MonoBehaviour {
         {
             File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
         }
-            
+
     }
 
-    IEnumerator DoTrainingCo()
+    IEnumerator DoTraining()
     {
         Process currentProcess = null;
         configIncrement = StartingConfigIncrement;
@@ -63,7 +64,7 @@ public class RunManager : MonoBehaviour {
 
                 var myArguments = new List<string>(); // Make a copy of the args
                 var runId = RunSetName + "-inc" + configIncrement + "-run" + currentRun;
-                myArguments.Add(UnityOutputExeName);
+                myArguments.Add(TrainingConfigName);
                 myArguments.Add("--run-id=" + runId); // Add our own arg
                 myArguments.Add("--train");
 
@@ -76,8 +77,10 @@ public class RunManager : MonoBehaviour {
                     CopyDirectory(sourcePath, targetPath);
                 }
 
-                CommandLineRunner.WorkingDirectory = tensorFlowConfig.MlAgentsRootDirectory;
-                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.MlAgentsRootDirectory, "learn.py", myArguments.ToArray());
+                var args = string.Join(" ", myArguments);
+
+                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.LearnEnvExecute + args,
+                    tensorFlowConfig.MlAgentsConfigDirectory);
 
                 // Coroutine hold until process is complete
                 while (currentProcess.HasExited == false)
@@ -112,7 +115,6 @@ public class RunManager : MonoBehaviour {
     {
         return currentRun;
     }
-
 
     public void IncrementLinear()
     {
