@@ -11,7 +11,7 @@ public class RunManager : MonoBehaviour
 
     public string RunSetName = "MyRunSet";
     public float PauseBeforeRun = 2f;
-    public string UnityOutputExeName;
+    public string TrainingConfigName = "trainer_config.yaml";
     public int StartingConfigIncrement = 1;
     public int MaxConfigIncrement = 1;
     public int RunsPerConfiguration = 1;
@@ -64,7 +64,7 @@ public class RunManager : MonoBehaviour
 
                 var myArguments = new List<string>(); // Make a copy of the args
                 var runId = RunSetName + "-inc" + configIncrement + "-run" + currentRun;
-                myArguments.Add(UnityOutputExeName);
+                myArguments.Add(TrainingConfigName);
                 myArguments.Add("--run-id=" + runId); // Add our own arg
                 myArguments.Add("--train");
 
