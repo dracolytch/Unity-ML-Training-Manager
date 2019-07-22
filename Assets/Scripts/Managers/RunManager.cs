@@ -77,8 +77,9 @@ public class RunManager : MonoBehaviour
                     CopyDirectory(sourcePath, targetPath);
                 }
 
-                CommandLineRunner.WorkingDirectory = tensorFlowConfig.MlAgentsConfigDirectory;
-                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.LearnEnvExecute,
+                var args = string.Join(" ", myArguments);
+
+                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.LearnEnvExecute + args,
                     tensorFlowConfig.MlAgentsConfigDirectory);
 
                 // Coroutine hold until process is complete

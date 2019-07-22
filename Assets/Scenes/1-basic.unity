@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TensorboardUrl: http://desktop-u8bijk9:6006
-  TensorboardStartupTime: 10
+  TensorboardStartupTime: 6
   tensorFlowConfig: {fileID: 58852528}
   OnTensorboardSuccess:
     m_PersistentCalls:

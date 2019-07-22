@@ -20,7 +20,7 @@ public class TensorFlowConfig : MonoBehaviour
     /// <summary>
     /// Starts the Conda Environment and executes ml-agents-learn
     /// </summary>
-    public string LearnEnvExecute { get { return $"activate {CondaEnvName} ^&& ml-agents-learn"; } }
+    public string LearnEnvExecute { get { return $"/K echo Agent is training, do not close.. && {ActivateCondaEnv} mlagents-learn "; } }
     /// <summary>
     /// Starts the Conda Environment and executes tensorboard
     /// </summary>
