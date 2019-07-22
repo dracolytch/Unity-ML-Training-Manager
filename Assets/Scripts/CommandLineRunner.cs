@@ -1,28 +1,37 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using UnityEngine;
 
-public static class CommandLineRunner {
+public static class CommandLineRunner
+{
     static List<Process> processes = new List<Process>();
     public static string WorkingDirectory;
 
-    public static Process StartCommandLine(string path, string program)
+    public static Process StartCommandLine(string command, string workingDirectory,
+        Action<Exception> errorCallBack = null)
     {
-        var args = new List<string>();
-        return StartCommandLine(path, program, args.ToArray());
-    }
+        try
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "cmd";
+            process.StartInfo.Arguments = command;
+            process.StartInfo.WorkingDirectory = workingDirectory;
+            process.StartInfo.CreateNoWindow = false;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = false;
 
-    public static Process StartCommandLine(string path, string program, string[] arguments)
-    {
-        var args = string.Join(" ", arguments);
-        var processInfo = new ProcessStartInfo(Path.Combine(path, program), args);
-        processInfo.WorkingDirectory = WorkingDirectory;
-        var process = Process.Start(processInfo);
+            process.Start();
+            return process;
 
-        processes.Add(process);
-        return process;
+        }
+        catch (Exception e)
+        {
+            if (errorCallBack != null)
+            {
+                errorCallBack.Invoke(e);
+            }
+            return null;
+        }
     }
 
     public static void CloseAllProcesses()
@@ -31,6 +40,6 @@ public static class CommandLineRunner {
         {
             //process.WaitForExit();
             process.Close();
-        }       
+        }
     }
 }

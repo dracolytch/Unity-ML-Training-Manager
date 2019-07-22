@@ -13,7 +13,7 @@ public class JsonSettingsAdapter : MonoBehaviour {
 
     public void SaveConfigForIncrement(RunManager manager)
     {
-        var configFile = Path.Combine(tensorFlowConfig.UnityOutputDirectory, ConfigFilename);
+        var configFile = Path.Combine(tensorFlowConfig.ConfigFileOutputDirectory, ConfigFilename);
         var outSettings = new List<SimpleSetting>();
 
         foreach (var setting in settings)
@@ -25,6 +25,6 @@ public class JsonSettingsAdapter : MonoBehaviour {
         var buffer = JsonUtility.ToJson(settingsJson);
 
         File.WriteAllText(configFile, buffer.ToString());
-        File.WriteAllText(Path.Combine(tensorFlowConfig.UnityOutputDirectory, manager.RunSetName + "-inc" + manager.GetCurrentStep() + ".json"), buffer.ToString());
+        File.WriteAllText(Path.Combine(tensorFlowConfig.ConfigFileOutputDirectory, manager.RunSetName + "-inc" + manager.GetCurrentStep() + ".json"), buffer.ToString());
     }
 }

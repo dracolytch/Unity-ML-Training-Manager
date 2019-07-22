@@ -1,12 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Diagnostics;
-using System;
-using System.IO;
 
-public class RunManager : MonoBehaviour {
+public class RunManager : MonoBehaviour
+{
 
     public string RunSetName = "MyRunSet";
     public float PauseBeforeRun = 2f;
@@ -31,7 +32,7 @@ public class RunManager : MonoBehaviour {
 
     public void ExecuteTraining()
     {
-        StartCoroutine(DoTrainingCo());
+        StartCoroutine(DoTraining());
     }
 
     static void CopyDirectory(string SourcePath, string DestinationPath)
@@ -45,10 +46,10 @@ public class RunManager : MonoBehaviour {
         {
             File.Copy(newPath, newPath.Replace(SourcePath, DestinationPath), true);
         }
-            
+
     }
 
-    IEnumerator DoTrainingCo()
+    IEnumerator DoTraining()
     {
         Process currentProcess = null;
         configIncrement = StartingConfigIncrement;
@@ -76,8 +77,9 @@ public class RunManager : MonoBehaviour {
                     CopyDirectory(sourcePath, targetPath);
                 }
 
-                CommandLineRunner.WorkingDirectory = tensorFlowConfig.MlAgentsRootDirectory;
-                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.MlAgentsRootDirectory, "learn.py", myArguments.ToArray());
+                CommandLineRunner.WorkingDirectory = tensorFlowConfig.MlAgentsConfigDirectory;
+                currentProcess = CommandLineRunner.StartCommandLine(tensorFlowConfig.LearnEnvExecute,
+                    tensorFlowConfig.MlAgentsConfigDirectory);
 
                 // Coroutine hold until process is complete
                 while (currentProcess.HasExited == false)
@@ -112,7 +114,6 @@ public class RunManager : MonoBehaviour {
     {
         return currentRun;
     }
-
 
     public void IncrementLinear()
     {
